@@ -8,7 +8,7 @@ The series starts with [Domion - Un sistema para desarrollar aplicaciones en .NE
 
 Published articles so far are:
 
-1. [Preparar una solución para ASP.NET Core](http://www.coderepo.blog/posts/preparar-solucion-aspnet-core/) - [Release 1.0]()
+1. [Preparar una solución para ASP.NET Core](http://www.coderepo.blog/posts/preparar-solucion-aspnet-core/) - [Release 1.0](https://github.com/mvelosop/Domion.Net/releases/tag/1.0)
 
 
 Hope this helps someone.

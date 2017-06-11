@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domion.Core\Domion.Core.csproj" />
+    <ProjectReference Include="..\DFlow.Budget.Lib\DFlow.Budget.Lib.csproj" />
   </ItemGroup>
 
 </Project>

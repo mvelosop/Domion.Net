@@ -1,8 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>netcoreapp1.1</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\Domion.Lib\Domion.Lib.csproj" />
+	  <ProjectReference Include="..\DFlow.Budget.Lib\DFlow.Budget.Lib.csproj" />
+	  <ProjectReference Include="..\DFlow.Budget.Setup\DFlow.Budget.Setup.csproj" />
+	</ItemGroup>
 
 </Project>

@@ -10,6 +10,7 @@ Published articles so far are:
 
 1. [Preparar una solución para ASP.NET Core](http://www.coderepo.blog/posts/preparar-solucion-aspnet-core/) - [Release 1.0](https://github.com/mvelosop/Domion.Net/releases/tag/1.0)
 
+2. [Patrón de repositorio con Entity Framework Core](http://www.coderepo.blog/posts/patron-repositorio-entity-framework-core/) - [Release 2.0](https://github.com/mvelosop/Domion.Net/releases/tag/2.0)
 
 Hope this helps someone.
 

@@ -105,7 +105,7 @@ namespace DFlow.Budget.Lib.Tests.Tests
                     errors.Should().BeEmpty();
                 }
 
-                var updated = manager.SingleOrDefault(bc => bc.Name == data.Name);
+                var updated = manager.SingleOrDefault(bc => bc.Name == update.Name);
 
                 if (updated != null)
                 {

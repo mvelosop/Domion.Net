@@ -8,13 +8,6 @@ namespace DFlow.Budget.Lib.Tests.Helpers
         {
         }
 
-        public BudgetClassData(BudgetClass entity)
-        {
-            Name = entity.Name;
-
-            TransactionType = entity.TransactionType;
-        }
-
         public BudgetClassData(string name, TransactionType transactionType)
         {
             Name = name;

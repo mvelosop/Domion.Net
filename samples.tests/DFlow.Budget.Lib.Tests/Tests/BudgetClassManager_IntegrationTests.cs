@@ -19,17 +19,17 @@ namespace DFlow.Budget.Lib.Tests.Tests
     {
         private const string ConnectionString = "Data Source=localhost;Initial Catalog=DFlow.Budget.Lib.Tests;Integrated Security=SSPI;MultipleActiveResultSets=true";
 
-        private static readonly Lazy<BudgetClassEntityDataMapper> _LazyBudgetClassEntityHelper;
         private static readonly BudgetDbSetupHelper DbSetupHelper;
+        private static readonly Lazy<BudgetClassDataMapper> LazyBudgetClassEntityHelper;
 
         static BudgetClassManager_IntegrationTests()
         {
             DbSetupHelper = SetupDatabase(ConnectionString);
 
-            _LazyBudgetClassEntityHelper = new Lazy<BudgetClassEntityDataMapper>(() => new BudgetClassEntityDataMapper());
+            LazyBudgetClassEntityHelper = new Lazy<BudgetClassDataMapper>(() => new BudgetClassDataMapper());
         }
 
-        public BudgetClassEntityDataMapper BudgetClassEntityDataMapper => _LazyBudgetClassEntityHelper.Value;
+        public BudgetClassDataMapper Mapper => LazyBudgetClassEntityHelper.Value;
 
         [Fact]
         public void TryDelete_DeletesRecord_WhenValidData()
@@ -49,7 +49,7 @@ namespace DFlow.Budget.Lib.Tests.Tests
 
             UsingManager(manager =>
             {
-                BudgetClass entity = manager.AssertGetByKeyData(data.Name);
+                BudgetClass entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
 
                 errors = manager.TryDelete(entity).ToList();
 
@@ -84,7 +84,7 @@ namespace DFlow.Budget.Lib.Tests.Tests
 
             UsingManager(manager =>
             {
-                BudgetClass entity = BudgetClassEntityDataMapper.CreateEntityFrom(data);
+                BudgetClass entity = Mapper.CreateEntity(data);
 
                 errors = manager.TryInsert(entity).ToList();
             });
@@ -112,9 +112,9 @@ namespace DFlow.Budget.Lib.Tests.Tests
 
             UsingManager(manager =>
             {
-                var entity = new BudgetClass { Name = data.Name, TransactionType = data.TransactionType };
+                BudgetClass entity = Mapper.CreateEntity(data);
 
-                errors = manager.TryInsert(entity);
+                errors = manager.TryInsert(entity).ToList();
 
                 manager.SaveChanges();
             });
@@ -148,7 +148,7 @@ namespace DFlow.Budget.Lib.Tests.Tests
 
             UsingManager(manager =>
             {
-                BudgetClass entity = manager.AssertGetByKeyData(dataFirst.Name);
+                BudgetClass entity = manager.SingleOrDefault(bc => bc.Name == dataFirst.Name);
 
                 entity.Name = dataSecond.Name;
 
@@ -180,7 +180,7 @@ namespace DFlow.Budget.Lib.Tests.Tests
 
             UsingManager(manager =>
             {
-                var entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
+                BudgetClass entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
 
                 entity.Name = update.Name;
 
@@ -201,7 +201,7 @@ namespace DFlow.Budget.Lib.Tests.Tests
 
         private static BudgetDbSetupHelper SetupDatabase(string connectionString)
         {
-            BudgetDbSetupHelper dbHelper = new BudgetDbSetupHelper(connectionString);
+            var dbHelper = new BudgetDbSetupHelper(connectionString);
 
             dbHelper.SetupDatabase();
 

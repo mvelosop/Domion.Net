@@ -3,8 +3,10 @@ using DFlow.Budget.Lib.Data;
 using DFlow.Budget.Lib.Services;
 using DFlow.Budget.Lib.Tests.Helpers;
 using DFlow.Budget.Setup;
+using Domion.FluentAssertions.Extensions;
 using Domion.Lib.Extensions;
 using FluentAssertions;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,112 +19,167 @@ namespace DFlow.Budget.Lib.Tests.Tests
     {
         private const string ConnectionString = "Data Source=localhost;Initial Catalog=DFlow.Budget.Lib.Tests;Integrated Security=SSPI;MultipleActiveResultSets=true";
 
-        private static BudgetDbSetupHelper dbSetupHelper;
+        private static readonly Lazy<BudgetClassEntityDataMapper> _LazyBudgetClassEntityHelper;
+        private static readonly BudgetDbSetupHelper DbSetupHelper;
 
         static BudgetClassManager_IntegrationTests()
         {
-            dbSetupHelper = SetupDatabase(ConnectionString);
+            DbSetupHelper = SetupDatabase(ConnectionString);
+
+            _LazyBudgetClassEntityHelper = new Lazy<BudgetClassEntityDataMapper>(() => new BudgetClassEntityDataMapper());
         }
 
-        [Fact]
-        public void TryInsert_InsertsRecord_WhenValidData()
-        {
-            IEnumerable<ValidationResult> errors;
+        public BudgetClassEntityDataMapper BudgetClassEntityDataMapper => _LazyBudgetClassEntityHelper.Value;
 
+        [Fact]
+        public void TryDelete_DeletesRecord_WhenValidData()
+        {
             // Arrange ---------------------------
 
-            var data = new BudgetClassData("Insert-Success-Valid - Inserted", TransactionType.Income);
+            var data = new BudgetClassData("Delete-Success-Valid - Inserted", TransactionType.Income);
 
-            // Ensure entitiy does not exist
-            using (var dbContext = dbSetupHelper.GetDbContext())
+            UsingManagerHelper(helper =>
             {
-                var manager = new BudgetClassManager(dbContext);
-
-                var entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
-
-                if (entity != null)
-                {
-                    errors = manager.TryDelete(entity);
-
-                    errors.Should().BeEmpty();
-
-                    manager.SaveChanges();
-                }
-            }
+                helper.EnsureEntitiesExist(data);
+            });
 
             // Act -------------------------------
 
-            // Insert entity
-            using (var dbContext = dbSetupHelper.GetDbContext())
+            IEnumerable<ValidationResult> errors = null;
+
+            UsingManager(manager =>
             {
-                var manager = new BudgetClassManager(dbContext);
+                BudgetClass entity = manager.AssertGetByKeyData(data.Name);
 
-                BudgetClass entity = new BudgetClass { Name = data.Name, TransactionType = data.TransactionType };
-
-                errors = manager.TryInsert(entity);
+                errors = manager.TryDelete(entity).ToList();
 
                 manager.SaveChanges();
-            }
+            });
 
             // Assert ----------------------------
 
             errors.Should().BeEmpty();
 
-            // Verify entity exists
-            using (var dbContext = dbSetupHelper.GetDbContext())
+            UsingManagerHelper(helper =>
             {
-                var manager = new BudgetClassManager(dbContext);
+                helper.AssertEntitiesDoNotExist(data);
+            });
+        }
 
-                var entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
+        [Fact]
+        public void TryInsert_Fails_WhenDuplicateKeyData()
+        {
+            // Arrange ---------------------------
 
-                entity.Should().NotBeNull();
-            }
+            var data = new BudgetClassData("Insert-Error-Duplicate - Inserted", TransactionType.Income);
+
+            UsingManagerHelper(helper =>
+            {
+                helper.EnsureEntitiesExist(data);
+            });
+
+            // Act -------------------------------
+
+            IEnumerable<ValidationResult> errors = null;
+
+            UsingManager(manager =>
+            {
+                BudgetClass entity = BudgetClassEntityDataMapper.CreateEntityFrom(data);
+
+                errors = manager.TryInsert(entity).ToList();
+            });
+
+            // Assert ----------------------------
+
+            errors.Should().ContainErrorMessage(BudgetClassManager.duplicateByNameError);
+        }
+
+        [Fact]
+        public void TryInsert_InsertsRecord_WhenValidData()
+        {
+            IEnumerable<ValidationResult> errors = null;
+
+            // Arrange ---------------------------
+
+            var data = new BudgetClassData("Insert-Success-Valid - Inserted", TransactionType.Income);
+
+            UsingManagerHelper(helper =>
+            {
+                helper.EnsureEntitiesDoNotExist(data);
+            });
+
+            // Act -------------------------------
+
+            UsingManager(manager =>
+            {
+                var entity = new BudgetClass { Name = data.Name, TransactionType = data.TransactionType };
+
+                errors = manager.TryInsert(entity);
+
+                manager.SaveChanges();
+            });
+
+            // Assert ----------------------------
+
+            errors.Should().BeEmpty();
+
+            UsingManagerHelper(helper =>
+            {
+                helper.AssertEntitiesExist(data);
+            });
+        }
+
+        [Fact]
+        public void TryUpdate_Fails_WhenDuplicateKeyData()
+        {
+            // Arrange ---------------------------
+
+            var dataFirst = new BudgetClassData("Update-Error-Duplicate - Inserted first", TransactionType.Income);
+            var dataSecond = new BudgetClassData("Update-Error-Duplicate - Inserted second", TransactionType.Income);
+
+            UsingManagerHelper(helper =>
+            {
+                helper.EnsureEntitiesExist(dataFirst, dataSecond);
+            });
+
+            // Act -------------------------------
+
+            IEnumerable<ValidationResult> errors = null;
+
+            UsingManager(manager =>
+            {
+                BudgetClass entity = manager.AssertGetByKeyData(dataFirst.Name);
+
+                entity.Name = dataSecond.Name;
+
+                errors = manager.TryUpdate(entity).ToList();
+            });
+
+            // Assert ----------------------------
+
+            errors.Should().ContainErrorMessage(BudgetClassManager.duplicateByNameError);
         }
 
         [Fact]
         public void TryUpdate_UpdatesRecord_WhenValidData()
         {
-            IEnumerable<ValidationResult> errors;
-
             // Arrange ---------------------------
 
             var data = new BudgetClassData("Update-Success-Valid - Inserted", TransactionType.Income);
             var update = new BudgetClassData("Update-Success-Valid - Updated", TransactionType.Income);
 
-            // Ensure entitiy "data" exists and "update" does not exist
-            using (var dbContext = dbSetupHelper.GetDbContext())
+            UsingManagerHelper(helper =>
             {
-                var manager = new BudgetClassManager(dbContext);
-
-                var existing = manager.SingleOrDefault(bc => bc.Name == data.Name);
-
-                if (existing == null)
-                {
-                    existing = new BudgetClass { Name = data.Name, TransactionType = data.TransactionType };
-
-                    errors = manager.TryInsert(existing);
-
-                    errors.Should().BeEmpty();
-                }
-
-                var updated = manager.SingleOrDefault(bc => bc.Name == update.Name);
-
-                if (updated != null)
-                {
-                    errors = manager.TryDelete(updated);
-
-                    errors.Should().BeEmpty();
-                }
-
-                manager.SaveChanges();
-            }
+                helper.EnsureEntitiesExist(data);
+                helper.EnsureEntitiesDoNotExist(update);
+            });
 
             // Act -------------------------------
 
-            using (var dbContext = dbSetupHelper.GetDbContext())
-            {
-                var manager = new BudgetClassManager(dbContext);
+            IEnumerable<ValidationResult> errors = null;
 
+            UsingManager(manager =>
+            {
                 var entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
 
                 entity.Name = update.Name;
@@ -130,20 +187,16 @@ namespace DFlow.Budget.Lib.Tests.Tests
                 errors = manager.TryUpdate(entity).ToList();
 
                 manager.SaveChanges();
-            }
+            });
 
             // Assert ----------------------------
 
             errors.Should().BeEmpty();
 
-            using (var dbContext = dbSetupHelper.GetDbContext())
+            UsingManagerHelper(helper =>
             {
-                var manager = new BudgetClassManager(dbContext);
-
-                var existing = manager.SingleOrDefault(bc => bc.Name == update.Name);
-
-                existing.Should().NotBeNull();
-            }
+                helper.AssertEntitiesExist(update);
+            });
         }
 
         private static BudgetDbSetupHelper SetupDatabase(string connectionString)
@@ -153,6 +206,27 @@ namespace DFlow.Budget.Lib.Tests.Tests
             dbHelper.SetupDatabase();
 
             return dbHelper;
+        }
+
+        private void UsingManager(Action<BudgetClassManager> action)
+        {
+            using (BudgetDbContext dbContext = DbSetupHelper.GetDbContext())
+            {
+                var manager = new BudgetClassManager(dbContext);
+
+                action.Invoke(manager);
+            }
+        }
+
+        private void UsingManagerHelper(Action<BudgetClassManagerHelper> action)
+        {
+            using (BudgetDbContext dbContext = DbSetupHelper.GetDbContext())
+            {
+                var manager = new BudgetClassManager(dbContext);
+                var helper = new BudgetClassManagerHelper(manager, DbSetupHelper);
+
+                action.Invoke(helper);
+            }
         }
     }
 }

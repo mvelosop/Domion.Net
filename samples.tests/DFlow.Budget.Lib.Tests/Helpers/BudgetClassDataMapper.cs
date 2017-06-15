@@ -6,12 +6,7 @@ namespace DFlow.Budget.Lib.Tests.Helpers
     {
         public BudgetClassData CreateData(BudgetClass entity)
         {
-            var data = new BudgetClassData
-            {
-                Name = entity.Name,
-
-                TransactionType = entity.TransactionType,
-            };
+            var data = new BudgetClassData(entity.Name, entity.TransactionType);
 
             return data;
         }

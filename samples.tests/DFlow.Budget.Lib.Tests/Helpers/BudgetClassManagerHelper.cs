@@ -9,25 +9,32 @@ namespace DFlow.Budget.Lib.Tests.Helpers
 {
     public class BudgetClassManagerHelper
     {
+        /// <summary>
+        ///     Creates a Helper for BudgetClassManager to help in the test's Arrange and Assert sections
+        /// </summary>
         public BudgetClassManagerHelper(
-            BudgetClassManager classManager,
-            BudgetDbSetupHelper dbSetupHelper)
+            BudgetClassManager classBudgetClassManager,
+            BudgetDbSetupHelper budgetDbSetupHelper)
         {
-            Manager = classManager;
-            DbSetupHelper = dbSetupHelper;
+            BudgetClassManager = classBudgetClassManager;
+            BudgetDbSetupHelper = budgetDbSetupHelper;
 
-            Mapper = new BudgetClassDataMapper();
+            BudgetClassMapper = new BudgetClassDataMapper();
         }
 
-        private BudgetClassDataMapper Mapper { get; }
+        private BudgetClassDataMapper BudgetClassMapper { get; }
 
-        private BudgetClassManager Manager { get; }
+        private BudgetClassManager BudgetClassManager { get; }
 
-        private BudgetDbSetupHelper DbSetupHelper { get; }
+        private BudgetDbSetupHelper BudgetDbSetupHelper { get; }
 
+        /// <summary>
+        ///     Asserts that entities with the supplied key data values do not exist
+        /// </summary>
+        /// <param name="dataSet">Data for the entities to be searched for</param>
         public void AssertEntitiesDoNotExist(params BudgetClassData[] dataSet)
         {
-            using (BudgetDbContext dbContext = DbSetupHelper.GetDbContext())
+            using (BudgetDbContext dbContext = BudgetDbSetupHelper.GetDbContext())
             {
                 var manager = new BudgetClassManager(dbContext);
 
@@ -40,9 +47,13 @@ namespace DFlow.Budget.Lib.Tests.Helpers
             }
         }
 
+        /// <summary>
+        ///     Asserts that entities equivalent to the supplied input data classes exist
+        /// </summary>
+        /// <param name="dataSet">Data for the entities to be searched for</param>
         public void AssertEntitiesExist(params BudgetClassData[] dataSet)
         {
-            using (BudgetDbContext dbContext = DbSetupHelper.GetDbContext())
+            using (BudgetDbContext dbContext = BudgetDbSetupHelper.GetDbContext())
             {
                 var manager = new BudgetClassManager(dbContext);
                 var mapper = new BudgetClassDataMapper();
@@ -60,38 +71,47 @@ namespace DFlow.Budget.Lib.Tests.Helpers
             }
         }
 
+        /// <summary>
+        ///     Ensures that the entities do not exist in the database or are succesfully removed
+        /// </summary>
+        /// <param name="dataSet">Data for the entities to be searched for and removed if necessary</param>
         public void EnsureEntitiesDoNotExist(params BudgetClassData[] dataSet)
         {
             foreach (BudgetClassData data in dataSet)
             {
-                BudgetClass entity = Manager.SingleOrDefault(e => e.Name == data.Name);
+                BudgetClass entity = BudgetClassManager.SingleOrDefault(e => e.Name == data.Name);
 
                 if (entity == null) continue;
 
-                var errors = Manager.TryDelete(entity);
+                var errors = BudgetClassManager.TryDelete(entity);
 
                 errors.Should().BeEmpty(@"because BudgetClass ""{0}"" has to be removed!", data.Name);
             }
 
-            Manager.SaveChanges();
+            BudgetClassManager.SaveChanges();
 
             AssertEntitiesDoNotExist(dataSet);
         }
 
+        /// <summary>
+        ///     Ensures that the entities exist in the database or are succesfully added
+        /// </summary>
+        /// <param name="dataSet"></param>
+        /// <param name="dataSet">Data for the entities to be searched for and added or updated if necessary</param>
         public void EnsureEntitiesExist(params BudgetClassData[] dataSet)
         {
             foreach (BudgetClassData data in dataSet)
             {
-                BudgetClass entity = Manager.SingleOrDefault(e => e.Name == data.Name);
+                BudgetClass entity = BudgetClassManager.SingleOrDefault(e => e.Name == data.Name);
 
-                entity = entity == null ? Mapper.CreateEntity(data) : Mapper.UpdateEntity(entity, data);
+                entity = entity == null ? BudgetClassMapper.CreateEntity(data) : BudgetClassMapper.UpdateEntity(entity, data);
 
-                var errors = Manager.TryUpsert(entity);
+                var errors = BudgetClassManager.TryUpsert(entity);
 
                 errors.Should().BeEmpty(@"because BudgetClass ""{0}"" has to be added!", data.Name);
             }
 
-            Manager.SaveChanges();
+            BudgetClassManager.SaveChanges();
 
             AssertEntitiesExist(dataSet);
         }

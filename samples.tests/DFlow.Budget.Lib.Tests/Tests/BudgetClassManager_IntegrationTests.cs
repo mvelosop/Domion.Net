@@ -134,12 +134,12 @@ namespace DFlow.Budget.Lib.Tests.Tests
         {
             // Arrange ---------------------------
 
-            var dataFirst = new BudgetClassData("Update-Error-Duplicate - Inserted first", TransactionType.Income);
-            var dataSecond = new BudgetClassData("Update-Error-Duplicate - Inserted second", TransactionType.Income);
+            var data = new BudgetClassData("Update-Error-Duplicate - Inserted first", TransactionType.Income);
+            var update = new BudgetClassData("Update-Error-Duplicate - Inserted second", TransactionType.Income);
 
             UsingManagerHelper(helper =>
             {
-                helper.EnsureEntitiesExist(dataFirst, dataSecond);
+                helper.EnsureEntitiesExist(data, update);
             });
 
             // Act -------------------------------
@@ -148,9 +148,9 @@ namespace DFlow.Budget.Lib.Tests.Tests
 
             UsingManager(manager =>
             {
-                BudgetClass entity = manager.SingleOrDefault(bc => bc.Name == dataFirst.Name);
+                BudgetClass entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
 
-                entity.Name = dataSecond.Name;
+                entity = Mapper.UpdateEntity(entity, update);
 
                 errors = manager.TryUpdate(entity).ToList();
             });
@@ -182,7 +182,7 @@ namespace DFlow.Budget.Lib.Tests.Tests
             {
                 BudgetClass entity = manager.SingleOrDefault(bc => bc.Name == data.Name);
 
-                entity.Name = update.Name;
+                entity = Mapper.UpdateEntity(entity, update);
 
                 errors = manager.TryUpdate(entity).ToList();
 

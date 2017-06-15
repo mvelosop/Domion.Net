@@ -4,10 +4,6 @@ namespace DFlow.Budget.Lib.Tests.Helpers
 {
     public class BudgetClassData
     {
-        public BudgetClassData()
-        {
-        }
-
         public BudgetClassData(string name, TransactionType transactionType)
         {
             Name = name;

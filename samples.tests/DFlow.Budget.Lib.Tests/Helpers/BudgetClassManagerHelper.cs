@@ -22,9 +22,9 @@ namespace DFlow.Budget.Lib.Tests.Helpers
             BudgetClassMapper = new BudgetClassDataMapper();
         }
 
-        private BudgetClassDataMapper BudgetClassMapper { get; }
-
         private BudgetClassManager BudgetClassManager { get; }
+
+        private BudgetClassDataMapper BudgetClassMapper { get; }
 
         private BudgetDbSetupHelper BudgetDbSetupHelper { get; }
 

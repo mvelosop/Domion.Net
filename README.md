@@ -8,9 +8,11 @@ The series starts with [Domion - Un sistema para desarrollar aplicaciones en .NE
 
 Published articles so far are:
 
-1. [Preparar una solución para ASP.NET Core](http://www.coderepo.blog/posts/preparar-solucion-aspnet-core/) - [Release 1.0](https://github.com/mvelosop/Domion.Net/releases/tag/1.0)
+1. [Preparar una solución para ASP.NET Core](http://www.coderepo.blog/posts/preparar-solucion-aspnet-core/) - [Release 1.0 (GitHub)](https://github.com/mvelosop/Domion.Net/releases/tag/1.0)
 
-2. [Patrón de repositorio con Entity Framework Core](http://www.coderepo.blog/posts/patron-repositorio-entity-framework-core/) - [Release 2.0](https://github.com/mvelosop/Domion.Net/releases/tag/2.0)
+2. [Patrón de repositorio con Entity Framework Core](http://www.coderepo.blog/posts/patron-repositorio-entity-framework-core/) - [Release 2.0 (GitHub)](https://github.com/mvelosop/Domion.Net/releases/tag/2.0)
+
+3. [Pruebas de integración con xUnit y Entity Framework Core](/posts/pruebas-integracion-xunit-entity-framework-core) - [Release 3.0 (GitHub)](https://github.com/mvelosop/Domion.Net/releases/tag/3.0)
 
 Hope this helps someone.
 
